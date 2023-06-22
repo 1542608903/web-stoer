@@ -6,8 +6,8 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import axios from "axios";
 import 'element-plus/theme-chalk/dark/css-vars.css'
-axios.defaults.baseURL = 'http://127.0.0.1:8080/';
-const baseURL  = 'http://127.0.0.1:8080/';
+axios.defaults.baseURL = 'http://127.0.0.1:8080';
+const baseURL  = 'http://127.0.0.1:8080';
 
 const app = createApp(App)
 app.use(router)

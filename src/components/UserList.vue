@@ -7,7 +7,7 @@
         <el-table-column prop="createDate" label="创建时间" width="200" />
         <el-table-column prop="userImage" label="图像" width="200">
         <template  #default="scope">
-            <el-image style="width: 40px; height: 40px" :src="scope.row.userImage" />
+            <el-image style="width: 40px; height: 40px" :src="iURL+scope.row.userImage" />
         </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作">
@@ -25,6 +25,7 @@ import {Delete,Edit} from '@element-plus/icons-vue'
 export default {
     data() {
         return {
+            iURL:'http://127.0.0.1:8080/images/',
             tableData: [],
             dialogVisible: false,
         }

@@ -7,7 +7,7 @@
         </template>
         <template #content>
             <span>
-                <el-avatar :size="32" :src="userInfo.userImage" />
+                <el-avatar :size="32" :src="iURL + userInfo.userImage" />
             </span>
             <span style="font-size: 10px;">姓名：{{ userInfo.name }}</span>
         </template>
@@ -28,6 +28,7 @@ import { useDark, useToggle } from '@vueuse/core'
 export default {
     data() {
         return {
+            iURL:'http://127.0.0.1:8080/images/',
             value: "",
             userInfo: [],
             userData: [],
@@ -62,7 +63,7 @@ export default {
             token = localStorage.getItem('token'),
                 // console.log('token值为：' + token);
                 // 发送获取用户信息的请求，携带token
-                axios.get('/api/userinfo', {
+                axios.get('/api/user/info', {
 
                     headers: {
                         Authorization: `Bearer ${token}`,

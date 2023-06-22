@@ -51,7 +51,7 @@
                 </el-col>
                 <el-col :span="14">
                     <div>
-                        <el-input-number v-model="goodsData.stock"/>
+                        <el-input-number v-model="goodsData.stock" />
                     </div>
                 </el-col>
             </el-row>
@@ -78,16 +78,31 @@
                     </div>
                 </el-col>
             </el-row>
-            <el-row :gutter="20">
-                <el-col :span="6">
-                    <span>
-                        图片URL：
-                    </span>
-                </el-col>
-                <el-col :span="14">
-                    <div>
-                        <el-input v-model="goodsData.coverImage" />
-                    </div>
+
+            <el-row :gutter="10">
+                <el-col :span="10">
+                    <el-upload action="http://127.0.0.1:8080/api/upload" list-type="picture-card"
+                        :before-upload="beforeUpload" :on-success="handleSuccess" :on-remove="handleRemove"
+                        :file-list="fileList" :limit="1">
+                        <el-icon>
+                            <Plus />
+                        </el-icon>
+                        <template #file="{ file }">
+                            <div>
+                                <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+                                <span class="el-upload-list__item-actions">
+                                    <span v-if="!Idisabled" class="el-upload-list__item-delete" @click="handleRemove">
+                                        <el-icon>
+                                            <Delete />
+                                        </el-icon>
+                                    </span>
+                                </span>
+                            </div>
+                        </template>
+                    </el-upload>
+                    <el-dialog v-model="IdialogVisible">
+                        <img w-full :src="imageUrl" />
+                    </el-dialog>
                 </el-col>
             </el-row>
 
@@ -165,21 +180,35 @@
                 </div>
             </el-col>
         </el-row>
-        <el-row :gutter="20">
-            <el-col :span="6">
-                <span>
-                    图片URL：
-                </span>
-            </el-col>
-            <el-col :span="14">
-                <div>
-                    <el-input v-model="ProductList.coverImage" />
-                </div>
-            </el-col>
-        </el-row>
+        <el-row :gutter="10">
+                <el-col :span="10">
+                    <el-upload action="http://127.0.0.1:8080/api/upload" list-type="picture-card"
+                        :before-upload="beforeUpload" :on-success="updateSuccess" :on-remove="handleRemove"
+                        :file-list="fileList" :limit="1">
+                        <el-icon>
+                            <Plus />
+                        </el-icon>
+                        <template #file="{ file}">
+                            <div>
+                                <img class="el-upload-list__item-thumbnail" :src="iURL + ProductList.coverImage"/>
+                                <span class="el-upload-list__item-actions">
+                                    <span v-if="!Idisabled" class="el-upload-list__item-delete" @click="handleRemove">
+                                        <el-icon>
+                                            <Delete />
+                                        </el-icon>
+                                    </span>
+                                </span>
+                            </div>
+                        </template>
+                    </el-upload>
+                    <el-dialog v-model="IdialogVisible"  >
+                        <img w-full :src="iURL+ProductList.coverImage" />
+                    </el-dialog>
+                </el-col>
+            </el-row>
         <template #footer>
-                    <el-button @click="updateProduct(ProductList.id),updateVisible=false">保存</el-button>
-                    <el-button type="primary" @click="this.updateVisible = false"> 取消 </el-button>
+            <el-button @click="updateProduct(ProductList.id), updateVisible = false">保存</el-button>
+            <el-button type="primary" @click="this.updateVisible = false"> 取消 </el-button>
         </template>
     </el-dialog>
     <!-- 商品列表 -->
@@ -193,7 +222,7 @@
             <el-table-column prop="createTime" label="上架时间" width="200" />
             <el-table-column prop="coverImage" label="商品封面" width="220">
                 <template #default="scope">
-                    <el-image style="width: 40px; height: 40px" :src="scope.row.coverImage" class="tp" />
+                    <el-image style="width: 40px; height: 40px" :src="iURL+scope.row.coverImage" class="tp" />
                 </template>
             </el-table-column>
 
@@ -203,7 +232,7 @@
                 </template>
                 <template #default="scope">
                     <el-button link type="primary" @click="handleButtonClick(scope.row.id)">删除</el-button>
-                    <el-button link type="primary" @click="oneProduct(scope.row.id),updateVisible=true">修改</el-button>
+                    <el-button link type="primary" @click="oneProduct(scope.row.id), updateVisible = true">修改</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -219,14 +248,14 @@ export default {
     },
     data() {
         return {
-            search: '',
+            imageUrl:'',
+            // search: '',
             dialogVisible: false,
             updateVisible: false,
-            dialogImageUrl: '',
             disabled: false,
             categories: [],
             tableData: [],
-            ProductList:[],
+            ProductList: [],
             goodsData: {
                 name: "",
                 detail: "",
@@ -237,6 +266,10 @@ export default {
                 moreImage: '',
                 classifyId: null,
             },
+            iURL:'http://127.0.0.1:8080/images/',
+            fileList:[],
+            IdialogVisible:false,
+            Idisabled:false,
         }
     },
     mounted() {
@@ -252,40 +285,6 @@ export default {
         },
     },
     methods: {
-        beforeUpload(file) {
-            // 对上传的文件进行格式和大小的限制
-            const isJPG = file.type === 'image/jpeg';
-            const isPNG = file.type === 'image/png';
-            const isLt2M = file.size / 1024 / 1024 < 2;
-
-            if (!isJPG && !isPNG) {
-                this.$message.error('只能上传 JPG/PNG 格式的图片');
-                return false;
-            }
-            if (!isLt2M) {
-                this.$message.error('图片大小不能超过 2MB');
-                return false;
-            }
-
-            return true;
-        },
-        handleUploadSuccess(response, file) {
-            const imageUrl = response.data.imageUrl;
-            // 发送请求将图片路径保存到数据库
-            this.saveImagePath(imageUrl);
-        },
-        saveImagePath(imageUrl) {
-            // 调用接口，将图片路径保存到数据库
-            axios.post('/api/saveImagePath', { imageUrl })
-                .then(response => {
-                    // 处理保存成功的逻辑
-                    console.log('图片路径保存成功');
-                })
-                .catch(error => {
-                    // 处理保存失败的逻辑
-                    console.error('图片路径保存失败', error);
-                });
-        },
         getClassify() {
             axios.get('/api/classify')
                 .then(response => {
@@ -299,20 +298,9 @@ export default {
             // 判断是否为空
             if (this.goodsData.name != '' && this.goodsData.detail != '' && this.goodsData.createTime != null) {
                 // 将 publishDate 转换为格式为 "yyyy-MM-dd"
-                const formattedDate = moment(this.goodsData.createTime).format("yyyy-MM-DD");
-                console.log(this.goodsData.detail);
+                this.goodsData.createTime = moment(this.goodsData.createTime).format("yyyy-MM-DD");
                 // 构造发送给后端的数据对象
-                const productData = {
-                    name: this.goodsData.name,
-                    detail: this.goodsData.detail,
-                    price: this.goodsData.price,
-                    stock: this.goodsData.stock,
-                    createTime: formattedDate,
-                    coverImage: this.goodsData.coverImage,
-                    moreImage: this.goodsData.moreImage,
-                    classifyId: this.goodsData.classifyId,
-                };
-                axios.post('/api/products', productData)
+                axios.post('/api/products/add', this.goodsData)
                     .then(response => {
                         // 处理成功响应
                         console.log("插入成功", response);
@@ -324,12 +312,8 @@ export default {
                             type: 'success',
                         })
                         // 清空数据
-                        this.goodsData.name = '';
-                        this.goodsData.detail = '';
-                        this.goodsData.price = 0;
-                        this.goodsData.stock = 1;
-                        this.goodsData.classifyId = null;
-                        this.goodsData.coverImage = "";
+                        this.goodsData = {}
+                        this.fileList = [];
                     })
                     .catch(error => {
                         console.log("插入失败", error);
@@ -347,7 +331,7 @@ export default {
             let gid = userId
             console.log('点击的商品ID:', gid);
             axios.get(`/api/products/${gid}`)
-                .then((response) =>{
+                .then((response) => {
                     this.ProductList = response.data
                     console.log(this.ProductList);
                 })
@@ -355,7 +339,7 @@ export default {
         // 修改商品
         updateProduct(id) {
             console.log(id);
-            axios.put(`/api/update/product/${id}`,this.ProductList)
+            axios.put(`/api/update/product/${id}`, this.ProductList)
                 .then(response => {
                     console.log(response.data);
                     ElMessage({ message: '修改成功', type: 'success', })
@@ -367,15 +351,14 @@ export default {
                     console.error('商品修改失败', error);
                     ElMessage({ message: '修改失败', type: 'success', })
                 });
-
         },
         // 删除商品操作
         handleButtonClick(userId) {
-            this.updateVisible = true
+            // this.updateVisible = true
             let gid = userId
             // 在这里处理点击行获取到的 userId
             console.log('点击的商品ID:', gid);
-            axios.delete(`/api/product/${gid}`)
+            axios.delete(`/api/delete/product/${gid}`)
                 .then(() => {
                     // 删除成功后刷新商品列表
                     this.productList();
@@ -386,15 +369,51 @@ export default {
         },
         // 查询商品列表
         productList() {
-            axios.get('/api/productlist')
+            axios.get('/api/product/list')
                 .then(response => {
                     this.tableData = response.data;
-                    
+
                 })
                 .catch(error => {
                     console.log(error);
                 });
         },
+        beforeUpload(file) {
+            const isJPG = file.type === 'image/jpeg';
+            const isPNG = file.type === 'image/png';
+            const isLt2M = file.size / 1024 / 1024 < 2;
+            if (!isJPG && !isPNG) {
+                this.$message.error('上传文件格式只能是 JPG/PNG格式!');
+            }
+            if (!isLt2M) {
+
+                this.$message.error('上传头像图片大小不能超过 2MB!');
+            }
+            return (isJPG || isPNG) && isLt2M;
+        },
+        handleRemove(file,fileList) {
+            const that = this;
+            that.fileList = [];
+            // 发送删除请求给后端
+            axios.delete(`/api/deleteImage?filePath=${that.imageUrl}`)
+                .then(response => {
+                    // 处理删除成功的情况
+                    console.log(response);
+                })
+                .catch(error => {
+                    // 处理删除失败的情况
+                    console.error('删除失败', error);
+                });
+        },
+        handleSuccess(response) {
+            // 上传成功后的处理
+             this.goodsData.coverImage = response.imageName; 
+             this.imageUrl = response.imageUrl;
+        },
+        updateSuccess(response) {
+            // 上传成功后的处理
+             this.ProductList.coverImage= response.imageName
+        }
     }
 }
 

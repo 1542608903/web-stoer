@@ -43,7 +43,7 @@
 						<UserFilled />
 					</el-icon>
 				</span>
-				<el-input v-model="from.username" placeholder="用户名" style="vertical-align:middle;width: 250px;" />
+				<el-input type="number" v-model="from.username" placeholder="用户名" style="vertical-align:middle;width: 250px;" />
 			</div>
 			<div class="input-box">
 				<span style="vertical-align:middle">
@@ -60,8 +60,6 @@
 			</div>
 		</div>
 	</div>
-	<!-- <div class="login-box">
-	</div> -->
 </template>
   
 <script>
@@ -133,11 +131,8 @@ export default {
 						return response;
 					})
 					.catch(function (error) {
-						console.log(error.response.data);
-						console.log(error.response.status);
-						if (error.response.status == 401) {
+					
 							ElMessage('账号或密码不存在!')
-						}
 					});
 
 

@@ -4,7 +4,6 @@ import Login from '@/components/Login.vue'
 import UserList from '@/components/UserList.vue'
 import GoodsList from '@/components/GoodsList.vue'
 import UpdateUser from '@/views/UpdateUser.vue'
-import ImageUpload from '@/views/ImageUpload.vue'
 import UserPower from '@/components/UserPower.vue'
 import Classify from '@/components/Classify.vue'
 
@@ -14,7 +13,7 @@ const router = createRouter({
     {
       path: '/home',
       component: Home,
-      children: [ //children声明子路由
+      children: [
         {
           path: '/userlist',
           name: 'UserList',
@@ -34,11 +33,6 @@ const router = createRouter({
           path: '/updateuser',
           name: 'UpdateUser',
           component: UpdateUser,
-        },
-        {
-          path: '/imageupload',
-          name: 'ImageUpload',
-          component: ImageUpload,
         },
         {
           path: '/classify',
